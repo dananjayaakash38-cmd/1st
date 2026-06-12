@@ -1,0 +1,290 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickDeals - Best Deals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+        
+        .logo-font { font-family: 'Poppins', sans-serif; }
+        
+        .deal-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .deal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.8s ease forwards; }
+
+        .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
+                        url('https://picsum.photos/id/1015/2000/1200') center/cover;
+            animation: heroZoom 25s infinite alternate ease-in-out;
+        }
+        @keyframes heroZoom {
+            from { background-size: 115%; }
+            to { background-size: 100%; }
+        }
+
+        .tab-active {
+            border-bottom: 3px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 640px) {
+            .hero-bg h1 {
+                font-size: 2.5rem;
+                line-height: 1.1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<!-- Navbar -->
+<nav class="bg-white border-b sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold logo-font">C</div>
+            <span class="text-2xl sm:text-3xl font-bold logo-font text-indigo-600">Click</span><span class="text-2xl sm:text-3xl font-bold logo-font">Deals</span>
+        </div>
+        <button onclick="showAdminLogin()" 
+                class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-2xl text-sm font-medium">
+            <i class="fa-solid fa-shield-halved"></i> <span class="hidden sm:inline">ADMIN</span>
+        </button>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero-bg min-h-screen flex items-center text-white relative">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center py-20">
+        <div class="inline-flex bg-white/20 backdrop-blur-md px-5 py-2 rounded-full mb-6 text-sm animate-in">
+            🔥 Live Deals Worldwide
+        </div>
+        <h1 class="text-5xl sm:text-6xl md:text-7xl font-bold mb-6 tracking-tighter animate-in">
+            Grab the <span class="text-yellow-300">Best Deals</span>
+        </h1>
+        <p class="text-lg sm:text-xl md:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto animate-in">
+            Real affiliate links • Prices in USD
+        </p>
+        <button onclick="document.getElementById('dealsSection').scrollIntoView({ behavior: 'smooth' })" 
+                class="bg-white text-gray-900 font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-3xl text-base sm:text-lg hover:bg-yellow-300 transition-all animate-in">
+            Explore Hot Deals →
+        </button>
+    </div>
+</header>
+
+<!-- Deals Section -->
+<section id="dealsSection" class="py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-8 sm:mb-10">🔥 Hot Deals</h2>
+        <div id="dealsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+            <!-- Products loaded by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ADMIN LOGIN MODAL -->
+<div id="loginModal" class="hidden fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center px-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+        <input type="password" id="adminPassword" 
+               class="w-full px-4 py-3 border rounded-2xl mb-4 text-lg" 
+               placeholder="Enter Password" onkeypress="if(event.key==='Enter') handleLogin()">
+        <button onclick="handleLogin()" 
+                class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-semibold text-lg">Login</button>
+        <button onclick="closeLoginModal()" class="w-full mt-4 text-gray-500">Cancel</button>
+    </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="flex border-b">
+            <button onclick="switchTab(0)" id="tab0" class="tab-active flex-1 py-5 text-center text-sm sm:text-base">➕ Add Product</button>
+            <button onclick="switchTab(1)" id="tab1" class="flex-1 py-5 text-center text-sm sm:text-base">🗑 Manage Products</button>
+        </div>
+        
+        <div class="p-6 sm:p-8 overflow-auto flex-1">
+            <!-- Add Product Tab -->
+            <div id="tabContent0">
+                <input id="title" type="text" placeholder="Product Name" class="w-full px-4 py-3 border rounded-2xl mb-4">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <input id="price" type="number" placeholder="Price (USD)" class="w-full px-4 py-3 border rounded-2xl">
+                    <input id="oldPrice" type="number" placeholder="Old Price (USD)" class="w-full px-4 py-3 border rounded-2xl">
+                </div>
+                <input id="imageUrl" type="text" placeholder="Product Image URL" class="w-full px-4 py-3 border rounded-2xl mb-4">
+                <input id="affiliateLink" type="text" placeholder="Affiliate Buy Now Link" class="w-full px-4 py-3 border rounded-2xl mb-4">
+                <input id="store" type="text" placeholder="Store Name" class="w-full px-4 py-3 border rounded-2xl mb-6">
+                
+                <button onclick="addProduct()" class="w-full bg-green-600 text-white py-4 rounded-3xl font-semibold">Add Product</button>
+            </div>
+
+            <!-- Manage Tab -->
+            <div id="tabContent1" class="hidden">
+                <div id="manageList" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <div class="border-t p-4">
+            <button onclick="closeAdminPanel()" class="w-full py-3 text-gray-500 hover:text-red-500 font-medium">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let deals = [];
+let isAdminLoggedIn = false;
+
+function loadDeals() {
+    const saved = localStorage.getItem('clickDeals');
+    if (saved) deals = JSON.parse(saved);
+    renderDeals();
+}
+
+function saveDeals() {
+    localStorage.setItem('clickDeals', JSON.stringify(deals));
+}
+
+function renderDeals() {
+    const grid = document.getElementById('dealsGrid');
+    grid.innerHTML = '';
+
+    if (deals.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">
+            <p class="text-lg">No products yet. Admin can add deals.</p>
+        </div>`;
+        return;
+    }
+
+    deals.forEach((deal, i) => {
+        const discount = deal.oldPrice ? Math.round(((deal.oldPrice - deal.price) / deal.oldPrice) * 100) : 0;
+        const card = document.createElement('div');
+        card.className = `deal-card bg-white rounded-3xl overflow-hidden border animate-in`;
+        card.style.animationDelay = `${i * 80}ms`;
+        card.innerHTML = `
+            <div class="relative">
+                <img src="${deal.imageUrl}" class="w-full h-48 sm:h-56 object-cover">
+                ${discount ? `<div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-2xl">-${discount}%</div>` : ''}
+            </div>
+            <div class="p-4 sm:p-5">
+                <p class="text-xs text-gray-500">${deal.store}</p>
+                <h3 class="font-semibold text-base sm:text-lg leading-tight my-3 line-clamp-2">${deal.title}</h3>
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="text-2xl sm:text-3xl font-bold">$${deal.price}</span>
+                    ${deal.oldPrice ? `<span class="text-gray-400 line-through text-sm">$${deal.oldPrice}</span>` : ''}
+                </div>
+                <button onclick="buyNow('${deal.affiliateLink}')" 
+                        class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3.5 rounded-3xl font-semibold text-sm sm:text-base">
+                    Buy Now →
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function buyNow(link) {
+    window.open(link, '_blank');
+}
+
+function addProduct() {
+    const title = document.getElementById('title').value.trim();
+    const price = parseFloat(document.getElementById('price').value);
+    const oldPrice = parseFloat(document.getElementById('oldPrice').value) || 0;
+    const imageUrl = document.getElementById('imageUrl').value.trim();
+    const affiliateLink = document.getElementById('affiliateLink').value.trim();
+    const store = document.getElementById('store').value.trim() || "Store";
+
+    if (!title || !price || !imageUrl || !affiliateLink) {
+        alert("Please fill all fields!");
+        return;
+    }
+
+    deals.unshift({ id: Date.now(), title, price, oldPrice, imageUrl, affiliateLink, store });
+    saveDeals();
+    renderDeals();
+    alert("✅ Product Added!");
+    renderManageList();
+}
+
+function renderManageList() {
+    const container = document.getElementById('manageList');
+    container.innerHTML = deals.length === 0 ? `<p class="text-gray-500 py-8 text-center">No products yet.</p>` : '';
+
+    deals.forEach(deal => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between bg-gray-50 p-4 rounded-2xl";
+        item.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="${deal.imageUrl}" class="w-12 h-12 object-cover rounded-lg">
+                <div class="text-sm">
+                    <p class="font-medium line-clamp-1">${deal.title}</p>
+                    <p class="text-gray-500">$${deal.price}</p>
+                </div>
+            </div>
+            <button onclick="deleteProduct(${deal.id}); event.stopImmediatePropagation()" 
+                    class="bg-red-500 text-white px-5 py-2 rounded-2xl text-sm font-medium">Delete</button>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function deleteProduct(id) {
+    if (confirm("Delete this product?")) {
+        deals = deals.filter(d => d.id !== id);
+        saveDeals();
+        renderDeals();
+        renderManageList();
+    }
+}
+
+function switchTab(n) {
+    document.getElementById('tab0').classList.toggle('tab-active', n === 0);
+    document.getElementById('tab1').classList.toggle('tab-active', n === 1);
+    document.getElementById('tabContent0').classList.toggle('hidden', n !== 0);
+    document.getElementById('tabContent1').classList.toggle('hidden', n !== 1);
+    if (n === 1) renderManageList();
+}
+
+// Admin Login
+function showAdminLogin() {
+    document.getElementById('loginModal').classList.remove('hidden');
+    document.getElementById('adminPassword').focus();
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('adminPassword').value = '';
+}
+
+function handleLogin() {
+    if (document.getElementById('adminPassword').value.trim() === "6919") {
+        closeLoginModal();
+        document.getElementById('adminPanel').classList.remove('hidden');
+        switchTab(0);
+    } else {
+        alert("❌ Wrong Password!");
+    }
+}
+
+function closeAdminPanel() {
+    document.getElementById('adminPanel').classList.add('hidden');
+}
+
+// Initialize
+window.onload = loadDeals;
+</script>
+</body>
+</html>
